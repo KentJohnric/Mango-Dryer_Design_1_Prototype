@@ -260,6 +260,7 @@ void editStageTime(bool stgtme_flag, int stageNumber, int stageIncDec, int stgtm
         int bStateS = digitalRead(startB);
         int bStateE = digitalRead(logicBE);
         int bStateF = digitalRead(logicBF);
+        Serial.println("Stage: " + String(stageNumber) + String("time:") + stgtme);
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print(String("Stage") + String(stageNumber) + String("Time:"));
@@ -313,6 +314,7 @@ void editStageTemp(bool stgtmp_flag, int stageNumber, int stageIncDec, int stgtm
         int bStateS = digitalRead(startB);
         int bStateE = digitalRead(logicBE);
         int bStateF = digitalRead(logicBF);
+        Serial.println("Stage" + String(stageNumber) + String(stgtmp));
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print(String("Stage") + String("stageNumber") + String("Temp:"));
@@ -367,6 +369,7 @@ void editMoistureContent()
         int bStateE = digitalRead(logicBE);
         int bStateF = digitalRead(logicBF);
         lcd.clear();
+        Serial.println("Moisture Content: " + String(MC));
         lcd.setCursor(0, 0);
         lcd.print("Moisture Content:");
         lcd.setCursor(0, 1);
@@ -458,6 +461,8 @@ void machineState()
         int bStateE = digitalRead(logicBE);
         int bStateF = digitalRead(logicBF);
         lcd.clear();
+        Serial.print("Mod Settings?");
+        Serial.println("SELC or Yes; Start for No");
         lcd.setCursor(0, 0);
         lcd.print("Mod Settings?");
         lcd.setCursor(0, 1);
