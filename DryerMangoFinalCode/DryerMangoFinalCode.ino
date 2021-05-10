@@ -51,6 +51,7 @@ bool stgtmp3_flag = true;          //Bool flag for while loop stage 3 temperatur
 bool moistCon_flag = true;         //Bool flag for while loop Moisture Content edit trap
 bool moistCon_flagInit = true;     //Bool flag for intial weight
 bool endState = true;              //Bool flag for while loop end state trap
+bool stg1state = true;             //Boolean stage 1 state for initial weight
 //---------------------------------------------------------------------------------------------------------------------------------------------------//
 void setup()
 {
@@ -447,38 +448,52 @@ void systemStateSTG1()
   digitalWrite(Buzzer, LOW);
   countDownMillis = millis();
   analogWrite(Fan, 255);
-  while (stgtme1C * 60000 >= millis() - countDownMillis)
+  while (stg1state)
   {
     int bStateS = digitalRead(startB);
-    sensors.requestTemperatures();
-    Celsius = sensors.getTempCByIndex(0);
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print(String("Temp: ") + String(Celsius));
-    lcd.setCursor(0, 1);
-    lcd.print(String("Time: ") + String(TimeLeft((stgtme1 * 60000 - (millis() - countDownMillis)))));
-    if (Celsius >= stgtmp1)
+    while (stgtme1C > (millis() - countDownMillis))
     {
-      digitalWrite(InfraredBulb, LOW);
+      int bStateS = digitalRead(startB);
+      sensors.requestTemperatures();
+      Celsius = sensors.getTempCByIndex(0);
+      lcd.clear();
       lcd.setCursor(0, 0);
-      lcd.print("Max Temp");
-    }
-    else
-    {
-      digitalWrite(InfraredBulb, HIGH);
+      lcd.print(String("Temp: ") + String(Celsius));
+      lcd.setCursor(0, 1);
+      lcd.print(String("Time: ") + String(TimeLeft((stgtme1 * 60000 - (millis() - countDownMillis)))));
+      if (Celsius >= stgtmp1)
+      {
+        digitalWrite(InfraredBulb, LOW);
+        lcd.setCursor(0, 0);
+        lcd.print("Max Temp");
+      }
+      else
+      {
+        digitalWrite(InfraredBulb, HIGH);
+      }
+      if (bStateS == 1)
+      {
+        buzzerBeep();
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print("Initial Weight");
+        stg1state = false;
+        measureInitialWeight();
+        delay(2000);
+      }
     }
     if (bStateS == 1)
     {
-      buzzerBeep();
       lcd.clear();
       lcd.setCursor(0, 0);
       lcd.print("Initial Weight");
+      stg1state = false;
       measureInitialWeight();
       delay(2000);
     }
+    buzzerBeep();
+    delay(1000);
   }
-  buzzerBeep();
-  measureInitialWeight();
 }
 
 /*Stage 1 Initial Weight Measurement*/
@@ -522,7 +537,7 @@ void systemStateSTG2()
   digitalWrite(Buzzer, LOW);
   countDownMillis = millis();
   analogWrite(Fan, 255);
-  while (stgtme2C * 60000 >= millis() - countDownMillis)
+  while (stgtme2C > millis() - countDownMillis)
   {
     int bStateS = digitalRead(startB);
     sensors.requestTemperatures();
@@ -551,8 +566,6 @@ void systemStateSTG2()
       delay(2000);
     }
   }
-  buzzerBeep();
-  systemStateSTG3();
 }
 
 /*Stage 3 heating process*/
@@ -560,7 +573,7 @@ void systemStateSTG3()
 {
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("Stage 2 Heating");
+  lcd.print("Stage 3 Heating");
   lcd.setCursor(0, 1);
   delay(1000);
   digitalWrite(Buzzer, HIGH);
@@ -573,7 +586,7 @@ void systemStateSTG3()
   while (stg3State <= 2)
   {
     countDownMillis = millis();
-    while (timeC * 60000 >= millis() - countDownMillis)
+    while (timeC > millis() - countDownMillis)
     {
       int bStateS = digitalRead(startB);
       sensors.requestTemperatures();
@@ -586,8 +599,6 @@ void systemStateSTG3()
       if (Celsius >= stgtmp3)
       {
         digitalWrite(InfraredBulb, LOW);
-        lcd.setCursor(0, 0);
-        lcd.print("Max Temp");
       }
       else
       {
@@ -602,6 +613,7 @@ void systemStateSTG3()
         delay(2000);
       }
     }
+    buzzerBeep();
     moistConCalc();
     stg3State++;
   }
@@ -621,7 +633,7 @@ void systemStateSTG4()
   digitalWrite(Buzzer, LOW);
   analogWrite(Fan, 255);
   countDownMillis = millis();
-  while (stgtme4C * 60000 >= millis() - countDownMillis)
+  while (stgtme4C > millis() - countDownMillis)
   {
     int bStateS = digitalRead(startB);
     sensors.requestTemperatures();
@@ -631,11 +643,9 @@ void systemStateSTG4()
     lcd.print(String("Temp: ") + String(Celsius));
     lcd.setCursor(0, 1);
     lcd.print(String("Time: ") + String(TimeLeft((stgtme4 * 60000 - (millis() - countDownMillis)))));
-    if (Celsius >= stgtmp4)
+    if (Celsius > stgtmp4)
     {
       digitalWrite(InfraredBulb, LOW);
-      lcd.setCursor(0, 0);
-      lcd.print("Max Temp");
     }
     else
     {
@@ -651,7 +661,7 @@ void systemStateSTG4()
     }
   }
   buzzerBeep();
-  moistConCalc();
+  moistConCalc4();
 }
 
 /*Moisture Content Calculation Function*/
@@ -699,6 +709,7 @@ void moistConCalc()
     buzzerBeep();
     endStateMachine();
   }
+  return;
 }
 
 /*Moisture Content Calculation Function for Stage 4*/
