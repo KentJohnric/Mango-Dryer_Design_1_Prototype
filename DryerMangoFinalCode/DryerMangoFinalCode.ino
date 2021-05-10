@@ -21,11 +21,14 @@ DallasTemperature sensors(&oneWire); //Assign Temperature Library to sensors
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
-int moistureConVal = 25;           //Delcaring Moisture Content Default value
 float stgtmp1 = 40;                //Stage 1 default temperature
 float stgtmp2 = 50;                //Stage 2 default temperature
 float stgtmp3 = 60;                //Stage 3 default temperature
 float stgtmp4 = 60;                //Stage 4 default temperature
+long stgtme1C;                     //Stage 1 converted time
+long stgtme2C;                     //Stage 2 converted time
+long stgtme3C;                     //Stage 3 converted time
+long stgtme4C;                     //Stage 4 converted time
 float Celsius = 0;                 //Declaring Celsius for Temperature Sensor
 long stgtme1 = 5;                  //Stage 1 Time default setting 5 minutes converted to Millis()
 long stgtme2 = 60;                 //Stage 2 Time default setting 1 Hours converted to Millis()
@@ -34,7 +37,7 @@ long stgtme4 = 5;                  //Stage 4 Time default setting 5 minutes conv
 const long interWeight = 150000;   //Giving Delay on Weight Calculation
 float fWeight;                     //Final Weight Declaration
 float iWeight;                     //Initial Weight Declaration
-float MC;                          // Moisture Content Declaration
+float MC = 25;                     // Moisture Content Declaration
 float MCC;                         //Computed Moisture Content Declaration
 unsigned long previousMillis = 0;  //For Timing Millis() funciton
 unsigned long countDownMillis = 0; //For Timing Millis() function
@@ -58,12 +61,17 @@ void setup()
   pinMode(startB, INPUT);        //setting start button pin mode to input
   pinMode(logicBE, INPUT);       //setting logic button state E pin mode to input
   pinMode(logicBF, INPUT);       //setting logic button state F pin mode to input
+  lcd.begin(16, 2);              //Initializing LCD
   LoadCell.begin();              //Initializing load cell
   LoadCell.start(2000);          //Giving load cell to computer every 2000 milliseconds
   LoadCell.setCalFactor(436.0);  // Callibration value of the used load cell bar
   sensors.begin();               //Initializing Temperature Sensor
   Serial.begin(9600);            //Setting baud rate to 9600
   analogWrite(ElecFan, 255);     //Initializing Electronics Cooling Fan
+  buzzerBeep();                  //Beeping Buzzer
+  lcd.setCursor(0, 0);           //Setting the row and column for print
+  lcd.print("Welcome!");         //Greeting the User
+  delay(2000);                   //Delay to display welcome
 }
 
 void loop()
@@ -78,17 +86,9 @@ void machineState()
     int bStateS = digitalRead(startB);
     int bStateE = digitalRead(logicBE);
     int bStateF = digitalRead(logicBF);
-    lcd.clear();
     Serial.println("Mod Settings? SEL for Yes & Start for No");
     lcd.setCursor(0, 0);
     lcd.print("Mod Settings?");
-    delay(1000);
-    lcd.setCursor(0, 1);
-    lcd.print("SELC for Yes");
-    delay(1000);
-    lcd.setCursor(0, 1);
-    lcd.print("Start for No");
-    delay(1000);
     if (bStateS == 1)
     {
       intro_flag = false;
@@ -118,19 +118,13 @@ void modifyStageTime1()
     lcd.print("Stage 1");
     lcd.setCursor(0, 1);
     lcd.print("Time: " + String(stgtme1));
-    delay(250);
     //Increment Stage Time
     if (bStateE == 1 && bStateF == 1)
     {
       if (stgtme1 < 10)
       {
         stgtme1 = stgtme1 + 1;
-      }
-      if (stgtme1 > 10)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Max Time");
-        delay(100);
+        delay(250);
       }
     }
     //Decrement Stage Time
@@ -139,18 +133,15 @@ void modifyStageTime1()
       if (stgtme1 > 3)
       {
         stgtme1 = stgtme1 - 1;
-      }
-      if (stgtme1 < 3)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Min Time");
-        delay(100);
+        delay(250);
       }
     }
     //Accept Stage Time
     if (bStateS == 1)
     {
-      stgtme1 = stgtme1 * (60000);
+      delay(250);
+      stgtme1C = stgtme1 * (60000);
+      Serial.println("Ctime1:" + String(stgtme1C));
       digitalWrite(Buzzer, HIGH);
       delay(100);
       digitalWrite(Buzzer, LOW);
@@ -175,19 +166,13 @@ void modifyStageTemp1()
     lcd.print("Stage 1");
     lcd.setCursor(0, 1);
     lcd.print("Temp: " + String(stgtmp1));
-    delay(250);
     //Increment Stage Temperature
     if (bStateE == 1 && bStateF == 1)
     {
       if (stgtmp1 < 60)
       {
         stgtmp1 = stgtmp1 + 1;
-      }
-      if (stgtmp1 > 60)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Max Temp");
-        delay(100);
+        delay(250);
       }
     }
     //Decrement Stage Temperature
@@ -196,17 +181,13 @@ void modifyStageTemp1()
       if (stgtmp1 > 35)
       {
         stgtmp1 = stgtmp1 - 1;
-      }
-      if (stgtmp1 < 35)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Min Temp");
-        delay(100);
+        delay(250);
       }
     }
     //Accept Stage Temperature
     if (bStateS == 1)
     {
+      delay(250);
       digitalWrite(Buzzer, HIGH);
       delay(100);
       digitalWrite(Buzzer, LOW);
@@ -231,19 +212,13 @@ void modifyStageTime2()
     lcd.print("Stage 2");
     lcd.setCursor(0, 1);
     lcd.print("Time: " + String(stgtme2));
-    delay(250);
     //Increment Stage Time
     if (bStateE == 1 && bStateF == 1)
     {
       if (stgtme2 < 90)
       {
         stgtme2 = stgtme2 + 1;
-      }
-      if (stgtme2 > 90)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Max Time");
-        delay(100);
+        delay(250);
       }
     }
     //Decrement Stage Time
@@ -252,18 +227,15 @@ void modifyStageTime2()
       if (stgtme2 > 45)
       {
         stgtme2 = stgtme2 - 1;
-      }
-      if (stgtme2 < 45)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Min Time");
-        delay(100);
+        delay(250);
       }
     }
     //Accept Stage Time
     if (bStateS == 1)
     {
-      stgtme2 = stgtme2 * (60000);
+      delay(250);
+      stgtme2C = stgtme2 * (60000);
+      Serial.println("CTime2:" + String(stgtme2C));
       digitalWrite(Buzzer, HIGH);
       delay(100);
       digitalWrite(Buzzer, LOW);
@@ -288,19 +260,13 @@ void modifyStageTemp2()
     lcd.print("Stage 2");
     lcd.setCursor(0, 1);
     lcd.print("Temp: " + String(stgtmp2));
-    delay(250);
     //Increment Stage Temperature
     if (bStateE == 1 && bStateF == 1)
     {
       if (stgtmp2 < 60)
       {
         stgtmp2 = stgtmp2 + 1;
-      }
-      if (stgtmp2 > 60)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Max Temp");
-        delay(100);
+        delay(250);
       }
     }
     //Decrement Stage Temperature
@@ -309,17 +275,13 @@ void modifyStageTemp2()
       if (stgtmp2 > 40)
       {
         stgtmp2 = stgtmp2 - 1;
-      }
-      if (stgtmp2 < 40)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Min Temp");
-        delay(100);
+        delay(250);
       }
     }
     //Accept Stage Temperature
     if (bStateS == 1)
     {
+      delay(250);
       digitalWrite(Buzzer, HIGH);
       delay(100);
       digitalWrite(Buzzer, LOW);
@@ -344,19 +306,13 @@ void modifyStageTime3()
     lcd.print("Stage 3");
     lcd.setCursor(0, 1);
     lcd.print("Time: " + String(stgtme3));
-    delay(250);
     //Increment Stage Time
     if (bStateE == 1 && bStateF == 1)
     {
       if (stgtme3 < 420)
       {
         stgtme3 = stgtme3 + 1;
-      }
-      if (stgtme3 > 420)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Max Time");
-        delay(100);
+        delay(250);
       }
     }
     //Decrement Stage Time
@@ -365,18 +321,16 @@ void modifyStageTime3()
       if (stgtme3 > 45)
       {
         stgtme3 = stgtme3 - 1;
-      }
-      if (stgtme3 < 45)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Min Time");
-        delay(100);
+        delay(250);
       }
     }
     //Accept Stage Time
     if (bStateS == 1)
     {
-      stgtme3 = stgtme3 * (60000);
+      delay(250);
+      stgtme3C = stgtme3 * (60000);
+      stgtme4C = stgtme4 * (60000);
+      Serial.println("CTime3:" + String(stgtme3C));
       digitalWrite(Buzzer, HIGH);
       delay(100);
       digitalWrite(Buzzer, LOW);
@@ -401,19 +355,13 @@ void modifyStageTemp3()
     lcd.print("Stage 3");
     lcd.setCursor(0, 1);
     lcd.print("Temp: " + String(stgtmp3));
-    delay(250);
     //Increment Stage Temperature
     if (bStateE == 1 && bStateF == 1)
     {
       if (stgtmp3 < 60)
       {
         stgtmp3 = stgtmp3 + 1;
-      }
-      if (stgtmp3 > 60)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Max Temp");
-        delay(100);
+        delay(250);
       }
     }
     //Decrement Stage Temperature
@@ -422,23 +370,19 @@ void modifyStageTemp3()
       if (stgtmp3 > 45)
       {
         stgtmp3 = stgtmp3 - 1;
-      }
-      if (stgtmp3 < 45)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Min Temp");
-        delay(100);
+        delay(250);
       }
     }
     //Accept Stage Temperature
     if (bStateS == 1)
     {
+      delay(250);
       digitalWrite(Buzzer, HIGH);
       delay(100);
       digitalWrite(Buzzer, LOW);
       Serial.println(stgtmp3);
       stgtmp1_flag = false;
-      modifyStageTime3();
+      modifyMoistureContent();
     }
   }
 }
@@ -446,12 +390,12 @@ void modifyStageTemp3()
 /*Moisture Content Modification Function*/
 void modifyMoistureContent()
 {
+  lcd.clear();
   while (moistCon_flag)
   {
     int bStateS = digitalRead(startB);
     int bStateE = digitalRead(logicBE);
     int bStateF = digitalRead(logicBF);
-    lcd.clear();
     Serial.println("Moisture Content: " + String(MC));
     lcd.setCursor(0, 0);
     lcd.print("Moisture Content:");
@@ -460,33 +404,25 @@ void modifyMoistureContent()
     if (bStateE == 1 && bStateF == 1)
     {
       //Increment
-      if (MC <= 30)
+      if (MC < 30)
       {
         MC = MC + 1;
-      }
-      if (MC > 30)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Max Content");
-        delay(500);
+        delay(250);
       }
     }
     if (bStateE == 0 && bStateF == 1)
     {
       //Decrement
-      if (MC >= 15)
+      if (MC > 15)
       {
         MC = MC - 1;
-      }
-      if (MC < 15)
-      {
-        lcd.setCursor(0, 1);
-        lcd.print("Min Content");
-        delay(500);
+        delay(250);
       }
     }
     if (bStateS == 1)
     {
+      delay(250);
+      dispVarSet();
       digitalWrite(Buzzer, HIGH);
       delay(100);
       digitalWrite(Buzzer, LOW);
@@ -511,7 +447,7 @@ void systemStateSTG1()
   digitalWrite(Buzzer, LOW);
   countDownMillis = millis();
   analogWrite(Fan, 255);
-  while (stgtme1 * 60000 >= millis() - countDownMillis)
+  while (stgtme1C * 60000 >= millis() - countDownMillis)
   {
     int bStateS = digitalRead(startB);
     sensors.requestTemperatures();
@@ -533,6 +469,7 @@ void systemStateSTG1()
     }
     if (bStateS == 1)
     {
+      buzzerBeep();
       lcd.clear();
       lcd.setCursor(0, 0);
       lcd.print("Initial Weight");
@@ -540,17 +477,19 @@ void systemStateSTG1()
       delay(2000);
     }
   }
+  buzzerBeep();
+  measureInitialWeight();
 }
 
 /*Stage 1 Initial Weight Measurement*/
 void measureInitialWeight()
 {
+  lcd.clear();
   while (moistCon_flagInit)
   {
     int bStateS = digitalRead(startB);
     LoadCell.update();
     float iWeight = LoadCell.getData();
-    lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("InitialWeight:");
     lcd.setCursor(0, 1);
@@ -561,11 +500,9 @@ void measureInitialWeight()
       lcd.setCursor(0, 0);
       lcd.print("Initial W:");
       lcd.setCursor(0, 1);
-      lcd.print(String(iWeight + String("Grams")));
-      delay(500);
-      digitalWrite(Buzzer, HIGH);
-      delay(100);
-      digitalWrite(Buzzer, LOW);
+      lcd.print(String(iWeight) + String("Grams"));
+      delay(1000);
+      buzzerBeep();
       moistCon_flagInit = false;
       systemStateSTG2();
     }
@@ -585,7 +522,7 @@ void systemStateSTG2()
   digitalWrite(Buzzer, LOW);
   countDownMillis = millis();
   analogWrite(Fan, 255);
-  while (stgtme2 * 60000 >= millis() - countDownMillis)
+  while (stgtme2C * 60000 >= millis() - countDownMillis)
   {
     int bStateS = digitalRead(startB);
     sensors.requestTemperatures();
@@ -607,12 +544,15 @@ void systemStateSTG2()
     }
     if (bStateS == 1)
     {
+      buzzerBeep();
       lcd.clear();
       lcd.setCursor(0, 0);
       systemStateSTG3();
       delay(2000);
     }
   }
+  buzzerBeep();
+  systemStateSTG3();
 }
 
 /*Stage 3 heating process*/
@@ -627,12 +567,13 @@ void systemStateSTG3()
   delay(100);
   digitalWrite(Buzzer, LOW);
   analogWrite(Fan, 255);
+  long timeC = stgtme3C / 3;
   long time = stgtme3 / 3;
   int stg3State = 0;
   while (stg3State <= 2)
   {
     countDownMillis = millis();
-    while (time * 60000 >= millis() - countDownMillis)
+    while (timeC * 60000 >= millis() - countDownMillis)
     {
       int bStateS = digitalRead(startB);
       sensors.requestTemperatures();
@@ -654,6 +595,7 @@ void systemStateSTG3()
       }
       if (bStateS == 1)
       {
+        buzzerBeep();
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Skipping");
@@ -663,6 +605,7 @@ void systemStateSTG3()
     moistConCalc();
     stg3State++;
   }
+  buzzerBeep();
   systemStateSTG4();
 }
 
@@ -678,7 +621,7 @@ void systemStateSTG4()
   digitalWrite(Buzzer, LOW);
   analogWrite(Fan, 255);
   countDownMillis = millis();
-  while (stgtme4 * 60000 >= millis() - countDownMillis)
+  while (stgtme4C * 60000 >= millis() - countDownMillis)
   {
     int bStateS = digitalRead(startB);
     sensors.requestTemperatures();
@@ -700,12 +643,14 @@ void systemStateSTG4()
     }
     if (bStateS == 1)
     {
+      buzzerBeep();
       lcd.clear();
       lcd.setCursor(0, 0);
       lcd.print("Skipping");
       delay(2000);
     }
   }
+  buzzerBeep();
   moistConCalc();
 }
 
@@ -751,6 +696,7 @@ void moistConCalc()
   }
   if (MCC <= MC)
   {
+    buzzerBeep();
     endStateMachine();
   }
 }
@@ -797,10 +743,12 @@ void moistConCalc4()
   }
   if (MCC <= MC)
   {
+    buzzerBeep();
     endStateMachine();
   }
   else
   {
+    buzzerBeep();
     systemStateSTG4();
   }
 }
@@ -852,4 +800,25 @@ String TimeLeft(unsigned long MsLeft)
     Results = (String)Results + S;
   }
   return Results;
+}
+
+/*Beeping the Buzzer*/
+void buzzerBeep()
+{
+  digitalWrite(Buzzer, HIGH);
+  delay(200);
+  digitalWrite(Buzzer, LOW);
+}
+
+/*Display Variable Values*/
+void dispVarSet()
+{
+  Serial.print("Stage1 " + String("Time:") + String(stgtme1) + String("Temp:") + String(stgtmp1));
+  Serial.print("Stage2 " + String("Time:") + String(stgtme2) + String("Temp:") + String(stgtmp2));
+  Serial.print("Stage3 " + String("Time:") + String(stgtme3) + String("Temp:") + String(stgtmp3));
+  Serial.print("Stage4 " + String("Time:") + String(stgtme4) + String("Temp:") + String(stgtmp4));
+  Serial.println("Stage1 " + String("TimeC:") + String(stgtme1C));
+  Serial.print("Stage2 " + String("TimeC:") + String(stgtme2C));
+  Serial.print("Stage3 " + String("TimeC:") + String(stgtme3C));
+  Serial.print("Stage4 " + String("TimeC:") + String(stgtme4C));
 }
