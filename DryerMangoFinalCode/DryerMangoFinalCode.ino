@@ -1,9 +1,9 @@
 //Sardina, Kent Johnric M. | Computer Engineering | Design Dryer Final Code Revision
 #include <LiquidCrystal.h>     //Library for LCD
-#include <Wire.h>              //Wire Library for LCD
 #include <OneWire.h>           //Wire library for Temperature Sensor DS18B20
 #include <DallasTemperature.h> //Temperature Sensor Library for DS18B20
-#include <HX711_ADC.h>         //Library for Load Cell IC HX711
+#include <HX711_ADC.h>         //For Load Cell
+#include <Wire.h>              //For LCD and LoadCell
 
 #define ONE_WIRE_BUS A2 //Temperature Sensor (DS18B20) A2 pin
 #define InfraredBulb 10 //Infrared Emitter Bulb 5 pin
