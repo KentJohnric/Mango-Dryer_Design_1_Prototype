@@ -9,7 +9,7 @@
 #define InfraredBulb A3 //Infrared Emitter Bulb 5 pin
 #define Buzzer A0       //Buzzer pin 6
 #define Fan A1          //Fan Pin A3
-#define ElecFan A2      //Electronics Cooling Fan pin 9
+#define ElecFan A5      //Electronics Cooling Fan pin 9
 
 int startB = 8;  //Start Button Pin 6
 int logicBE = 6; //Button pin 4 Logic State E
