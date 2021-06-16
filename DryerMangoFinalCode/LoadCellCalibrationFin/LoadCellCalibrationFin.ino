@@ -15,6 +15,10 @@ void setup() {
 }
 
 void loop() {
+  testload();
+}
+
+void testload(){
   lcd.clear();
   while(moistCon_flagInit){
     LoadCell.update();
