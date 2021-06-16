@@ -15,7 +15,7 @@ int startB = 8;  //Start Button Pin 6
 int logicBE = 6; //Button pin 4 Logic State E
 int logicBF = 7; //Button pin 5 logic State F
 
-HX711_ADC LoadCell(9, 10);                                  //DataOUT A0 pin and 13 SCK pin
+HX711_ADC LoadCell(9, 10);                                  //DataOUT 9 pin and 10 SCK pin
 OneWire oneWire(ONE_WIRE_BUS);                              //Temperature Wire BUS
 DallasTemperature sensors(&oneWire);                        //Assign Temperature Library to sensors
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2; //Setting up the variables to pins number
@@ -508,8 +508,11 @@ void measureInitialWeight()
     lcd.setCursor(0, 0);
     lcd.print("InitialWeight:");
     lcd.setCursor(0, 1);
-    lcd.print(String(iWeight) + String("Grams"));
-    delay(250);
+    lcd.print(iWeight);
+    lcd.print("Grams");
+    Serial.print("Weight[g]:");
+    Serial.println(iWeight);
+    //lcd.print(String(iWeight) + String("Grams"));
     if (bStateS == 1)
     {
       lcd.clear();
