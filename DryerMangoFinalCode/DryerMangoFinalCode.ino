@@ -6,8 +6,8 @@
 #include <Wire.h>              //For LCD and LoadCell
 
 #define ONE_WIRE_BUS A2 //Temperature Sensor (DS18B20) A2 pin
-#define InfraredBulb 10 //Infrared Emitter Bulb 5 pin
-#define Buzzer 9        //Buzzer pin 6
+#define InfraredBulb A3 //Infrared Emitter Bulb 5 pin
+#define Buzzer A0       //Buzzer pin 6
 #define Fan A1          //Fan Pin A3
 #define ElecFan A2      //Electronics Cooling Fan pin 9
 
