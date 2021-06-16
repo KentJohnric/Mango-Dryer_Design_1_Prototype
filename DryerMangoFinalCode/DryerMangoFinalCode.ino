@@ -55,6 +55,10 @@ bool stg1state = true;             //Boolean stage 1 state for initial weight
 //---------------------------------------------------------------------------------------------------------------------------------------------------//
 void setup()
 {
+  lcd.begin(16, 2);              //Initializing LCD
+  LoadCell.begin();              //Initializing Load Cell HX711
+  LoadCell.start(2000);          //Giving load cell to compute every 2000 milliseconds
+  LoadCell.setCalFactor(445);    //Callibration value of the used load cell bar
   pinMode(Buzzer, OUTPUT);       //Setting Buzzer pin mode to output
   pinMode(InfraredBulb, OUTPUT); //Setting Infrared Bulb pin mode to output
   pinMode(Fan, OUTPUT);          //Setting Infrared Heater Fan pin mode to output
@@ -62,10 +66,6 @@ void setup()
   pinMode(startB, INPUT);        //setting start button pin mode to input
   pinMode(logicBE, INPUT);       //setting logic button state E pin mode to input
   pinMode(logicBF, INPUT);       //setting logic button state F pin mode to input
-  lcd.begin(16, 2);              //Initializing LCD
-  LoadCell.begin();              //Initializing load cell
-  LoadCell.start(2000);          //Giving load cell to computer every 2000 milliseconds
-  LoadCell.setCalFactor(445);    // Callibration value of the used load cell bar
   sensors.begin();               //Initializing Temperature Sensor
   Serial.begin(9600);            //Setting baud rate to 9600
   analogWrite(ElecFan, 255);     //Initializing Electronics Cooling Fan
@@ -505,14 +505,14 @@ void measureInitialWeight()
     int bStateS = digitalRead(startB);
     LoadCell.update();
     float iWeight = LoadCell.getData();
+    lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("InitialWeight:");
     lcd.setCursor(0, 1);
     lcd.print(iWeight);
-    lcd.print("Grams");
-    Serial.print("Weight[g]:");
+    lcd.print(" Grams[g]");
+    Serial.print("Weight[g]: ");
     Serial.println(iWeight);
-    //lcd.print(String(iWeight) + String("Grams"));
     if (bStateS == 1)
     {
       lcd.clear();
