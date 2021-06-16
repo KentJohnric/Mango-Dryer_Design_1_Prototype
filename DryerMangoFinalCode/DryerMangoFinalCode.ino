@@ -15,11 +15,11 @@ int startB = 8;  //Start Button Pin 6
 int logicBE = 6; //Button pin 4 Logic State E
 int logicBF = 7; //Button pin 5 logic State F
 
-HX711_ADC LoadCell(A0, 13);          //DataOUT A0 pin and 13 SCK pin
-OneWire oneWire(ONE_WIRE_BUS);       //Temperature Wire BUS
-DallasTemperature sensors(&oneWire); //Assign Temperature Library to sensors
-const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+HX711_ADC LoadCell(9, 10);                                  //DataOUT A0 pin and 13 SCK pin
+OneWire oneWire(ONE_WIRE_BUS);                              //Temperature Wire BUS
+DallasTemperature sensors(&oneWire);                        //Assign Temperature Library to sensors
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2; //Setting up the variables to pins number
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);                  //Setting the defined pin to LCD
 
 float stgtmp1 = 40;                //Stage 1 default temperature
 float stgtmp2 = 50;                //Stage 2 default temperature
@@ -65,7 +65,7 @@ void setup()
   lcd.begin(16, 2);              //Initializing LCD
   LoadCell.begin();              //Initializing load cell
   LoadCell.start(2000);          //Giving load cell to computer every 2000 milliseconds
-  LoadCell.setCalFactor(436.0);  // Callibration value of the used load cell bar
+  LoadCell.setCalFactor(445);    // Callibration value of the used load cell bar
   sensors.begin();               //Initializing Temperature Sensor
   Serial.begin(9600);            //Setting baud rate to 9600
   analogWrite(ElecFan, 255);     //Initializing Electronics Cooling Fan
@@ -509,6 +509,7 @@ void measureInitialWeight()
     lcd.print("InitialWeight:");
     lcd.setCursor(0, 1);
     lcd.print(String(iWeight) + String("Grams"));
+    delay(250);
     if (bStateS == 1)
     {
       lcd.clear();
@@ -610,6 +611,7 @@ void systemStateSTG3()
         lcd.clear();
         lcd.setCursor(0, 0);
         lcd.print("Skipping");
+        systemStateSTG4();
         delay(2000);
       }
     }
