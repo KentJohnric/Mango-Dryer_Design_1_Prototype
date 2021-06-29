@@ -77,6 +77,9 @@ void setup()
 
 void loop()
 {
+  lcd.setCursor(0, 0);
+  lcd.print("Stating Machine");
+  delay(5000);
   machineState();
 }
 
@@ -90,6 +93,8 @@ void machineState()
     Serial.println("Mod Settings? SEL for Yes & Start for No");
     lcd.setCursor(0, 0);
     lcd.print("Mod Settings?");
+    bStateS = 0;
+    delay(1000);
     if (bStateS == 1)
     {
       intro_flag = false;
